@@ -31,7 +31,7 @@ impl TryFrom<&String> for SqliteStorageAdapter {
 
 impl StorageAdapter for SqliteStorageAdapter {
     fn get(&self, key: &str) -> Option<Setting> {
-        let db_lock = self.connection.lock().unwrap();
+        let db_lock = self.connection.lock().expect("Poisoned");
 
         let query = "SELECT * FROM settings WHERE key = :key";
         let mut statement = db_lock.prepare(query).unwrap();
@@ -47,7 +47,7 @@ impl StorageAdapter for SqliteStorageAdapter {
     }
 
     fn set(&self, key: &str, value: Setting) {
-        let db_lock = self.connection.lock().unwrap();
+        let db_lock = self.connection.lock().expect("Poisoned");
 
         let query = "INSERT OR REPLACE INTO settings (key, value) VALUES (:key, :value)";
         let mut statement = db_lock.prepare(query).unwrap();
@@ -58,7 +58,7 @@ impl StorageAdapter for SqliteStorageAdapter {
     }
 
     fn all(&self) -> Result<HashMap<String, Setting>> {
-        let db_lock = self.connection.lock().unwrap();
+        let db_lock = self.connection.lock().expect("Poisoned");
 
         let query = "SELECT * FROM settings";
         let mut statement = db_lock.prepare(query).unwrap();
