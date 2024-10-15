@@ -15,7 +15,6 @@ pub struct CssColorEntry {
     pub value: &'static str,
 }
 
-/// A RGB color with alpha channel
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct RgbColor {
     /// Red component
