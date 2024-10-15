@@ -73,7 +73,7 @@ impl JsonStorageAdapter {
         let mut file = File::open(&self.path).expect("failed to open json file");
 
         let mut buf = String::new();
-        _ = file.read_to_string(&mut buf);
+        let _ = file.read_to_string(&mut buf);
 
         let parsed_json: Value = serde_json::from_str(&buf).expect("Failed to parse json");
 
