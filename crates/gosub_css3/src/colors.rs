@@ -9,12 +9,12 @@ use lazy_static::lazy_static;
 // Values for this table is taken from https://www.w3.org/TR/CSS21/propidx.html
 // Probably not the complete list, but it will do for now
 
-/// A list of CSS color names
 pub struct CssColorEntry {
     pub name: &'static str,
     pub value: &'static str,
 }
 
+/// A RGB color with alpha channel
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct RgbColor {
     /// Red component
