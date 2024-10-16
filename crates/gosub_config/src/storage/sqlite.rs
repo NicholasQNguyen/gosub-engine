@@ -4,7 +4,7 @@ use gosub_shared::types::Result;
 use log::warn;
 use std::collections::HashMap;
 use std::str::FromStr;
-use std::sync::{LockResult, Mutex};
+use std::sync::Mutex;
 
 pub struct SqliteStorageAdapter {
     connection: Mutex<sqlite::Connection>,
@@ -44,38 +44,37 @@ impl StorageAdapter for SqliteStorageAdapter {
         // Then we return a None
         let mut statement = match db_lock.prepare(query) {
             Ok(s) => {s}
-            Err(_) => {
-                warn!("problem preparing statement: {err}");
+            Err(e) => {
+                warn!("problem preparing statement: {e}");
                 return None
             }
         };
         match statement.bind((":key", key)) {
             Ok(_) => {}
-            Err(_) => {
-                warn!("problem binding statement: {err}");
+            Err(e) => {
+                warn!("problem binding statement: {e}");
                 return None
             }
         };
 
         match Setting::from_str(key) {
             Ok(setting) => Some(setting),
-            Err(err) => {
-                warn!("problem reading from sqlite: {err}");
+            Err(e) => {
+                warn!("problem reading from sqlite: {e}");
                 None
             }
         }
     }
 
-    fn set(&self, key: &str, value: Setting) -> Result<()> {
+    fn set(&self, key: &str, value: Setting) {
         let db_lock = self.connection.lock().expect("Poisoned");
 
         let query = "INSERT OR REPLACE INTO settings (key, value) VALUES (:key, :value)";
-        let mut statement = db_lock.prepare(query)?;
-        statement.bind((":key", key))?;
-        statement.bind((":value", value.to_string().as_str()))?;
+        let mut statement = db_lock.prepare(query).expect("Poisoned");
+        statement.bind((":key", key)).expect("Failed to bind");
+        statement.bind((":value", value.to_string().as_str())).expect("Failed to bind");
 
-        statement.next()?;
-        Ok(())
+        statement.next().expect("Failed to execute the set");
     }
 
     fn all(&self) -> Result<HashMap<String, Setting>> {
