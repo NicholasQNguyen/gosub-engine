@@ -331,7 +331,6 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
     fn macro_usage_with_panic() {
         config_set!(string "this.key.doesnt.exist", "yesitdoes".into());
         let s = config!(string "this.key.doesnt.exist");
