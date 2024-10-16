@@ -6,7 +6,7 @@ use crate::settings::{Setting, SettingInfo};
 use crate::storage::MemoryStorageAdapter;
 use gosub_shared::types::Result;
 use lazy_static::lazy_static;
-use log::warn;
+use log::{error, warn};
 use serde_derive::Deserialize;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -200,7 +200,7 @@ impl ConfigStore {
         if let Some(setting) = self.storage.get(key) {
             self.settings
                 .lock()
-                .unwrap()
+                .expect("Poisoned")
                 .borrow_mut()
                 .insert(key.to_string(), setting.clone());
             return Some(setting.clone());
@@ -212,8 +212,9 @@ impl ConfigStore {
         }
 
         // At this point we haven't found the key in the store, we haven't found it in storage, and we
-        // don't have a default value. This is a programming error, so we panic.
-        panic!("config: Setting {} is not known", key);
+        // don't have a default value. This is a programming error
+        error!("config: Setting {} is not known", key);
+        None
     }
 
     /// Sets the given setting to the given value. Will persist the setting to the
